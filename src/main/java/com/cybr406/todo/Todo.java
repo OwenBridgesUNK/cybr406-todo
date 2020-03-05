@@ -1,18 +1,25 @@
 package com.cybr406.todo;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+
+@Entity
 public class Todo {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String author;
 
+    @Lob
     private String details;
 
+    @OneToMany(mappedBy = "todo")
     private List<Task> tasks = new ArrayList<>();
 
     public Long getId() {

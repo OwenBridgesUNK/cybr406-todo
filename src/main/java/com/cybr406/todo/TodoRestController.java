@@ -1,6 +1,8 @@
 package com.cybr406.todo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,15 +17,21 @@ public class TodoRestController {
     @Autowired
     InMemoryTodoRepository inMemoryTodoRepository;
 
+    @Autowired
+    TaskJpaRepository taskJpaRepository;
+
+    @Autowired
+    TodoJpaRepository todoJpaRepository;
+
     @PostMapping("/todos")
     public ResponseEntity<Todo> createTodo(@Valid @RequestBody Todo toDoObject){
-        Todo createdTodo = inMemoryTodoRepository.create(toDoObject);
+        Todo createdTodo = todoJpaRepository.save(toDoObject);
         return new ResponseEntity<>(createdTodo, HttpStatus.CREATED);
     }
 
     @GetMapping("/todos/{id}")
     public ResponseEntity<Todo> getDetailInfo(@Valid @PathVariable long id){
-        Optional<Todo> list = inMemoryTodoRepository.find(id);
+        Optional<Todo> list = todoJpaRepository.findById(id);
         if (list.isPresent()) {
             Todo data = list.get();
             return new ResponseEntity<>(data, HttpStatus.OK);
@@ -33,34 +41,56 @@ public class TodoRestController {
     }
 
     @GetMapping("/todos")
-    public ResponseEntity<List<Todo>> paginated(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        List<Todo> paginatedList = inMemoryTodoRepository.findAll(page, size);
-        return new ResponseEntity<>(paginatedList, HttpStatus.OK);
+    public Page<Todo> findAll(Pageable page) {
+        return todoJpaRepository.findAll(page);
     }
 
+    //help
     @PostMapping("/todos/{id}/tasks")
     public ResponseEntity<Todo> taskMethod(@PathVariable long id, @RequestBody Task task){
-        Todo newTask = inMemoryTodoRepository.addTask(id,task);
-        return new ResponseEntity<>(newTask, HttpStatus.CREATED);
+        Optional<Todo> addTask = todoJpaRepository.findById(id);
+
+        if (addTask.isPresent()) {
+            Todo todo = addTask.get();
+            todo.getTasks().add(task);
+            task.setTodo(todo);
+            taskJpaRepository.save(task);
+            return new ResponseEntity<>(todo, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("/todos/{id}")
     public ResponseEntity delete(@PathVariable long id){
-        try {
-            inMemoryTodoRepository.delete(id);
+        if (todoJpaRepository.existsById(id)) {
+            todoJpaRepository.deleteById(id);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } catch (NoSuchElementException error){
+        } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
+//        try {
+//            inMemoryTodoRepository.delete(id);
+//            return new ResponseEntity(HttpStatus.NO_CONTENT);
+//        } catch (NoSuchElementException error){
+//            return new ResponseEntity(HttpStatus.NOT_FOUND);
+//        }
     }
 
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity deleteTask(@PathVariable long id){
-        try {
-            inMemoryTodoRepository.deleteTask(id);
+        if (taskJpaRepository.existsById(id)) {
+            taskJpaRepository.deleteById(id);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } catch (NoSuchElementException error){
+        } else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
+
+//        try {
+//            inMemoryTodoRepository.deleteTask(id);
+//            return new ResponseEntity(HttpStatus.NO_CONTENT);
+//        } catch (NoSuchElementException error){
+//            return new ResponseEntity(HttpStatus.NOT_FOUND);
+//        }
     }
 }

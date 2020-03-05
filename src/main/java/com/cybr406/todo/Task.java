@@ -1,18 +1,26 @@
 package com.cybr406.todo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sun.javafx.beans.IDProperty;
 
+import javax.persistence.*;
 import java.util.Objects;
 
+
+@Entity
 public class Task {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @JsonIgnore
+    @ManyToOne()
     private Todo todo;
 
     private Boolean completed;
 
+    @Lob
     private String details;
 
     public Task() {

@@ -176,7 +176,7 @@ public class Homework2JPATests {
          * Remember, these must be Java interfaces, not classes. Interfaces describe the requirements of a class without
          * providing any method implementations.
          *
-         * Each interface should extend JpaRepository<T, ID>, where T is the type of class being managed, and ID is
+         * Each interface should extend 1<T, ID>, where T is the type of class being managed, and ID is
          * Java type of the class's @Id annotated field.
          *
          * Finally, annotate your new classes with @Repository.
