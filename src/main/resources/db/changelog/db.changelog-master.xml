@@ -8,4 +8,13 @@
 
     <!-- Homework 3: Complete the change log by adding elements to this file. -->
 
+    <changeSet id="todo-table" author="bridgesom">
+        <createTable tableName="TODO">
+            <column name="ID" autoIncrement="true" type="BIGINT"/>
+            <column name="AUTHOR" type="VARCHAR(255)"/>
+            <column name="DETAILS" type="CLOB"/>
+
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
